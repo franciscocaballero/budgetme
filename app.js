@@ -11,7 +11,7 @@ let budgetController = (function () {
         this.percentage = -1;
     };
 
-    Expense.prototype.calcPercentage = function(totalIncome) {
+    Expense.prototype.calcPercentage = function (totalIncome) {
         if (totalIncome > 0) {
             this.percentage = Math.round((this.value / totalIncome) * 100);
         } else {
@@ -19,7 +19,7 @@ let budgetController = (function () {
         }
     };
 
-    Expense.prototype.getPercentage = function() {
+    Expense.prototype.getPercentage = function () {
         return this.percentage;
     }
     let Income = function (id, description, value) {
@@ -113,18 +113,18 @@ let budgetController = (function () {
             }
 
         },
-        calculatePercentages: function() {
+        calculatePercentages: function () {
 
 
 
 
-            data.allItems.exp.forEach(function(cur) {
-              cur.calcPercentage(data.totals.inc);
+            data.allItems.exp.forEach(function (cur) {
+                cur.calcPercentage(data.totals.inc);
             });
         },
 
-        getPercentages: function() {
-            let allPerctages = data.allItems.exp.map(function(cur) {
+        getPercentages: function () {
+            let allPerctages = data.allItems.exp.map(function (cur) {
                 return cur.getPercentage();
             });
             return allPerctages;
@@ -173,8 +173,8 @@ let UIController = (function () {
         dateLabel: '.budget__title--month'
     }
 
-    let formatNumber = function(num, type) {
-        let numSplit,int,dec;
+    let formatNumber = function (num, type) {
+        let numSplit, int, dec;
         /*
        + or - before number 
        exacly 2 decimal points 
@@ -189,12 +189,9 @@ let UIController = (function () {
         numSplit = num.split('.')
 
         int = numSplit[0];
-        if (int.length > 3){
+        if (int.length > 3) {
             int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, int.length); //input 23510, output 23,510
         }
-
-
-
         dec = numSplit[1];
 
         // type == 'exp' ? sign = '-' : sign = '+';
@@ -202,6 +199,12 @@ let UIController = (function () {
         return (type === 'exp' ? '-' : '+') + ' ' + int + "." + dec;
 
     };
+
+    let nodeListForEach = function (list, callback) {
+        for (let i = 0; i < list.length; i++) {
+            callback(list[i], i);
+        }
+        };
 
     return {
         getInput: function () {
@@ -240,14 +243,14 @@ let UIController = (function () {
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
         },
 
-        deleteListItem: function(selectorID) {
+        deleteListItem: function (selectorID) {
 
             let el = document.getElementById(selectorID);
 
             el.parentNode.removeChild(el);
             // let element = document.getElementById('selectorID')
             // document.getElementById('selectorID').parentNode.removeChild(document.getElementById('selectorID'));
-        
+
         },
 
         clearFields: function () {
@@ -264,19 +267,13 @@ let UIController = (function () {
 
             fieldsArr[0].focus();
         },
-        displayPercentages: function(percentages) {
+        displayPercentages: function (percentages) {
 
             let fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
 
-            let nodeListForEach = function(list, callback) {
-                for(let i = 0; i < list.length; i++) {
-                    callback(list[i], i);
-                }
-            };
+            nodeListForEach(fields, function (current, index) {
 
-            nodeListForEach(fields, function(current, index) {
-
-                if (percentages[index] > 0){ 
+                if (percentages[index] > 0) {
                     current.textContent = percentages[index] + '%';
                 } else {
                     current.textContent = '---';
@@ -285,9 +282,9 @@ let UIController = (function () {
 
         },
 
-        displayMonth: function() {
+        displayMonth: function () {
             let now, month, year;
-            
+
             now = new Date();
 
             months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -308,7 +305,7 @@ let UIController = (function () {
             //Budget 
             document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(obj.budget, type);
 
-            document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc,'inc');
+            document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc, 'inc');
 
             document.querySelector(DOMstrings.expenseLabel).textContent = formatNumber(obj.totalExp, 'exp');
 
@@ -320,11 +317,24 @@ let UIController = (function () {
             }
 
         },
+        changedType: function () {
+
+            let fields = document.querySelectorAll(
+                DOMstrings.inputType + ',' +
+                DOMstrings.inputDescription + ',' +
+                DOMstrings.inputValue);
+
+            nodeListForEach(fields, function (cur) {
+                cur.classList.toggle('red-focus');
+            });
+
+            document.querySelector(DOMstrings.inputBtn).classList.toggle('red');
+        },
 
         testing: function () {
             console.log(data);
         }
-    }
+    };
 
 })();
 
@@ -346,6 +356,8 @@ let controller = (function (budgetCtrl, UICtrl) {
         });
 
         document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
+
+        document.querySelector(DOM.inputType).addEventListener('change', UICtrl.changedType);
     };
 
     let updateBudget = function () {
@@ -355,9 +367,9 @@ let controller = (function (budgetCtrl, UICtrl) {
         let budget = budgetCtrl.getBudget();
         // 3. Display the budget on the UI
         UICtrl.displayBudget(budget);
-    };    
-    
-    let updatePercentages = function() {
+    };
+
+    let updatePercentages = function () {
 
         // 1. Calculate percentages 
         budgetCtrl.calculatePercentages();
