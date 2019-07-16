@@ -169,21 +169,19 @@ let UIController = (function () {
         expenseLabel: '.budget__expenses--value',
         percentageLabel: '.budget__expenses--percentage',
         container: '.container',
-        expensesPercLabel: '.item__percentage'
+        expensesPercLabel: '.item__percentage',
+        dateLabel: '.budget__title--month'
     }
 
     let formatNumber = function(num, type) {
         let numSplit,int,dec;
         /*
-        
        + or - before number 
        exacly 2 decimal points 
        comma separating the thousands 
 
        2310.4567 -> + 2,310.46
        2000 -> + 2,000.00
-
-
         */
         num = Math.abs(num);
         num = num.toFixed(2);
@@ -192,7 +190,7 @@ let UIController = (function () {
 
         int = numSplit[0];
         if (int.length > 3){
-            int = int.substr(0, int.length - 3) + '.' + int.substr(int.length - 3, int.length); //input 23510, outpuut 23,510
+            int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, int.length); //input 23510, output 23,510
         }
 
 
@@ -201,7 +199,7 @@ let UIController = (function () {
 
         // type == 'exp' ? sign = '-' : sign = '+';
 
-        return (type === 'exp' ? '-' : '+') + ' ' + int + "," + dec;
+        return (type === 'exp' ? '-' : '+') + ' ' + int + "." + dec;
 
     };
 
@@ -287,14 +285,25 @@ let UIController = (function () {
 
         },
 
+        displayMonth: function() {
+            let now, month, year;
+            
+            now = new Date();
 
+            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            month = now.getMonth();
+
+            year = now.getFullYear();
+
+            document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ' ' + year;
+        },
 
         getDOMStrings: function () {
             return DOMstrings;
         },
 
         displayBudget: function (obj) {
-            let tyoe;
+            let type;
             obj.budget > 0 ? type = 'inc' : type = 'exp';
             //Budget 
             document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(obj.budget, type);
@@ -405,6 +414,7 @@ let controller = (function (budgetCtrl, UICtrl) {
     return {
         init: function () {
             console.log('Application has started!');
+            UICtrl.displayMonth();
             UICtrl.displayBudget({
                 budget: 0,
                 totalInc: 0,
